@@ -37,19 +37,30 @@ export const CAPA_PROPOSTA = svgUri(`
 <path d="M170 164c10-18 18-18 24-4s16 6 28-6" fill="none" stroke="#0b1d33" stroke-opacity=".5" stroke-width="2" stroke-linecap="round"/>`)
 
 export const CAPA_TREINO = svgUri(`
-<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1B2848"/><stop offset="1" stop-color="#005C8B"/></linearGradient></defs>
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1B2848"/><stop offset="1" stop-color="#000000"/></linearGradient></defs>
 <rect width="272" height="184" fill="#f3f8fb"/>
 <rect width="272" height="42" fill="url(#g)"/>
 <circle cx="26" cy="70" r="8" fill="#32ad78"/><path d="M22 70l3 3 5-6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 <rect x="44" y="66" width="150" height="7" rx="3.5" fill="#0b1d33" fill-opacity=".55"/>
 <circle cx="26" cy="96" r="8" fill="#32ad78"/><path d="M22 96l3 3 5-6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 <rect x="44" y="92" width="120" height="7" rx="3.5" fill="#0b1d33" fill-opacity=".55"/>
-<circle cx="26" cy="122" r="8" fill="none" stroke="#005C8B" stroke-width="2"/>
+<circle cx="26" cy="122" r="8" fill="none" stroke="#1B2848" stroke-width="2"/>
 <rect x="44" y="118" width="170" height="7" rx="3.5" fill="#0b1d33" fill-opacity=".25"/>
-<rect x="16" y="152" width="240" height="8" rx="4" fill="#005C8B" fill-opacity=".15"/>
-<rect x="16" y="152" width="150" height="8" rx="4" fill="#6ABB8C"/>`)
+<rect x="16" y="152" width="240" height="8" rx="4" fill="#1B2848" fill-opacity=".18"/>
+<rect x="16" y="152" width="150" height="8" rx="4" fill="#1B2848"/>`)
 
-const abrir = (url?: string) => url && window.open(url, "_blank", "noopener")
+const abrir = (url?: string) => {
+  if (!url) return
+  // Resolve relativo (ex.: propostas/exemplo.pdf) a partir do index.html — funciona em file:// e http://
+  const abs = new URL(url, location.href).href
+  const a = document.createElement("a")
+  a.href = abs
+  a.target = "_blank"
+  a.rel = "noopener noreferrer"
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+}
 
 export function embedDe(url?: string): string | null {
   if (!url) return null
@@ -93,7 +104,8 @@ export default function App() {
 
   if (!cfg) return <FundoVidro />
 
-  const slug = new URLSearchParams(location.search).get("c")?.toLowerCase() ?? ""
+  // Sem ?c=..., usa "exemplo" (PDF em propostas/exemplo.pdf). Link do cliente: ?c=slug
+  const slug = new URLSearchParams(location.search).get("c")?.toLowerCase() || "exemplo"
   const proposta = cfg.propostas[slug]
   const msg = encodeURIComponent(
     `Olá! Vi a proposta da TecnoCursos${proposta ? ` (${proposta.cliente})` : ""} e gostaria de conversar.`,
@@ -104,56 +116,40 @@ export default function App() {
     <div className="relative flex min-h-dvh flex-col text-white">
       <FundoVidro />
 
-      <div className="sticky top-4 z-30 mx-auto w-[min(1120px,100%-24px)]">
-        <header className="vidro-card flex items-center justify-between rounded-full px-4 py-2.5 sm:px-5">
-          <img src={LOGO} alt="TecnoCursos" className="h-7 sm:h-8" />
-          <a href={linkFalar} target="_blank" rel="noopener noreferrer" className="btn-falar px-3.5 py-2 text-xs sm:px-5 sm:text-sm">
-            <IconeFalar className="size-3.5 sm:size-4" />
-            Vamos conversar?
-          </a>
-        </header>
+      <div className="relative z-30 mx-auto flex w-[min(1120px,100%-32px)] items-center pt-4 sm:pt-5">
+        <img src={LOGO} alt="TecnoCursos" className="h-8 sm:h-9" />
+        {proposta && (
+          <span className="ml-auto max-w-[55%] truncate text-right text-xs text-white/55 sm:text-sm">
+            Proposta · {proposta.cliente}
+          </span>
+        )}
       </div>
 
       <main className="mx-auto flex w-[min(1120px,100%-32px)] flex-1 flex-col">
-        <section className="pt-10 pb-2 text-center sm:pt-14">
-          <span className="rise inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs text-white/85 backdrop-blur">
-            <span className="size-1.5 rounded-full bg-brand shadow-[0_0_10px_#32ad78]" />
-            {proposta ? `Proposta · ${proposta.cliente}` : "Proposta Comercial"}
-          </span>
-
+        <section className="pt-6 pb-1 text-center sm:pt-8">
           <h1
-            className="rise mx-auto mt-5 max-w-3xl text-[clamp(1.85rem,5.5vw,3.4rem)] leading-[1.15] font-bold tracking-tight"
+            className="rise mx-auto max-w-3xl text-[clamp(1.7rem,5vw,3rem)] leading-[1.12] font-bold tracking-tight"
             style={{ animationDelay: "80ms" }}
           >
             {proposta ? (
               <>
-                Olá, <span className="shimmer">{proposta.cliente}</span>
+                Olá, <span className="text-brand">{proposta.cliente}</span>
               </>
             ) : (
-              <>
-                Sua <span className="font-extrabold">experiência</span> começa aqui.
-              </>
+              <>Sua experiência começa aqui.</>
             )}
           </h1>
 
           <p
-            className="rise mx-auto mt-4 max-w-xl text-sm leading-relaxed text-white/70 sm:text-base"
+            className="rise mx-auto mt-3 max-w-xl text-sm leading-relaxed text-white/70 sm:text-[0.95rem]"
             style={{ animationDelay: "160ms" }}
           >
-            {proposta
-              ? "Conheça a TecnoCursos, abra sua proposta e explore o treinamento — tudo nas pastas abaixo."
-              : "Conheça nossa empresa, explore sua proposta e descubra nossas soluções."}
+            Abra as pastas: vídeo, proposta e treinamento.
           </p>
         </section>
 
-        <section className="grid grid-cols-1 items-end justify-items-center gap-x-5 gap-y-2 pt-6 pb-8 md:grid-cols-3 md:pt-10 md:pb-10">
-          <div
-            className="pasta-wrap royal cursor-pointer"
-            onClick={() => {
-              const e = embedDe(cfg.video)
-              e ? setPlayer(e) : abrir(cfg.video)
-            }}
-          >
+        <section className="grid grid-cols-1 items-end justify-items-center gap-x-5 gap-y-1 pt-3 pb-5 md:grid-cols-3 md:pt-4 md:pb-6">
+          <div className="pasta-wrap royal cursor-pointer">
             <GlassFolder
               className="pasta royal"
               label="Conheça a TecnoCursos"
@@ -163,11 +159,20 @@ export default function App() {
               width={largura}
               appearDelay={0}
               open={false}
+              onOpenChange={(queroAbrir) => {
+                if (!queroAbrir) return
+                const e = embedDe(cfg.video)
+                e ? setPlayer(e) : abrir(cfg.video)
+              }}
+              onFileSelect={() => {
+                const e = embedDe(cfg.video)
+                e ? setPlayer(e) : abrir(cfg.video)
+              }}
               files={[{ name: "Vídeo institucional", meta: "Assistir", image: CAPA_VIDEO }]}
             />
           </div>
 
-          <div className="pasta-wrap verde destaque cursor-pointer" onClick={() => abrir(proposta?.pdf)}>
+          <div className="pasta-wrap verde destaque cursor-pointer">
             <GlassFolder
               className="pasta verde"
               label="Sua proposta"
@@ -177,17 +182,21 @@ export default function App() {
               width={largura}
               appearDelay={120}
               open={false}
+              onOpenChange={(queroAbrir) => {
+                if (queroAbrir) abrir(proposta?.pdf)
+              }}
+              onFileSelect={() => abrir(proposta?.pdf)}
               files={[
                 proposta
-                  ? { name: "Proposta comercial", meta: "PDF", image: CAPA_PROPOSTA }
+                  ? { name: "Proposta comercial", meta: "PDF", image: CAPA_PROPOSTA, href: proposta.pdf }
                   : { name: "Use o seu link exclusivo", meta: "Indisponível", image: CAPA_PROPOSTA },
               ]}
             />
           </div>
 
-          <div className="pasta-wrap marinho cursor-pointer" onClick={() => abrir(cfg.treinamento)}>
+          <div className="pasta-wrap grafite cursor-pointer">
             <GlassFolder
-              className="pasta marinho"
+              className="pasta grafite"
               label="Treinamentos"
               meta="Conheça a plataforma"
               art="none"
@@ -195,48 +204,35 @@ export default function App() {
               width={largura}
               appearDelay={240}
               open={false}
-              files={[{ name: "Treinamento online", meta: "Demonstração", image: CAPA_TREINO }]}
+              onOpenChange={(queroAbrir) => {
+                if (queroAbrir) abrir(cfg.treinamento)
+              }}
+              onFileSelect={() => abrir(cfg.treinamento)}
+              files={[{ name: "Treinamento online", meta: "Demonstração", image: CAPA_TREINO, href: cfg.treinamento }]}
             />
           </div>
         </section>
 
-        <div
-          className="passos-bar rise mx-auto mb-10 w-full max-w-4xl rounded-2xl px-4 py-4 sm:rounded-full sm:px-6 sm:py-3.5"
-          style={{ animationDelay: "280ms" }}
-        >
-          <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:gap-5">
-            <span className="shrink-0 text-center text-sm font-semibold text-white/90 sm:text-left">Simples e direto:</span>
-            <ol className="flex flex-1 flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
-              {PASSOS.map((texto, i) => (
-                <li key={texto} className="flex items-center gap-2.5 text-sm text-white/80">
-                  <span className="grid size-7 shrink-0 place-items-center rounded-full bg-brand text-xs font-bold text-white shadow-[0_0_16px_rgba(50,173,120,.55)]">
-                    {i + 1}
-                  </span>
-                  <span>{texto}</span>
-                  {i < PASSOS.length - 1 && (
-                    <span className="mx-1 hidden text-white/25 sm:inline" aria-hidden>
-                      ›
-                    </span>
-                  )}
-                </li>
-              ))}
-            </ol>
-          </div>
+        <div className="rise mx-auto mb-6 w-full max-w-md px-1" style={{ animationDelay: "280ms" }}>
+          <a href={linkFalar} target="_blank" rel="noopener noreferrer" className="btn-falar flex w-full px-6 py-3.5 text-base">
+            <IconeFalar className="size-5" />
+            Vamos conversar?
+          </a>
+          <p className="mt-4 text-center text-xs leading-relaxed text-white/45 sm:text-[13px]">
+            {PASSOS.map((t, i) => (
+              <span key={t}>
+                {i > 0 && <span className="mx-1.5 text-white/25">·</span>}
+                {t}
+              </span>
+            ))}
+          </p>
         </div>
       </main>
 
-      <footer className="fecho mt-auto px-6 pt-14 pb-10 text-center">
-        <h2 className="text-xl font-extrabold tracking-tight text-navy sm:text-2xl md:text-3xl">
-          Tecnologia, treinamento e segurança.
-        </h2>
-        <p className="mt-2 text-base font-medium text-brand sm:text-lg">Tudo conectado para a sua empresa.</p>
-        <a href={linkFalar} target="_blank" rel="noopener noreferrer" className="btn-falar mt-7 px-6 py-3 text-sm">
-          <IconeFalar />
-          Falar com um especialista
-        </a>
-        <p className="mt-8 text-xs text-navy/50">
+      <footer className="mt-auto px-6 pt-8 pb-8 text-center">
+        <p className="text-xs text-white/40">
           © TecnoCursos ·{" "}
-          <a href="https://tecnocursos.com.br/" target="_blank" rel="noopener noreferrer" className="text-brand-blue hover:underline">
+          <a href="https://tecnocursos.com.br/" target="_blank" rel="noopener noreferrer" className="text-white/55 hover:text-brand-light">
             tecnocursos.com.br
           </a>
         </p>
@@ -265,17 +261,6 @@ export default function App() {
         </div>
       )}
 
-      {cfg.whatsapp && (
-        <a
-          href={linkFalar}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Falar no WhatsApp"
-          className="fixed right-5 bottom-5 z-40 grid size-14 place-items-center rounded-full bg-brand text-white shadow-[0_12px_30px_-6px_rgba(50,173,120,.9)] transition hover:scale-110"
-        >
-          <IconeFalar className="size-7" />
-        </a>
-      )}
     </div>
   )
 }

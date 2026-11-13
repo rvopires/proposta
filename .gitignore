@@ -1,0 +1,20 @@
+# Dependências e build local
+site/node_modules/
+site/dist/
+site/*.tsbuildinfo
+site/tsconfig.tsbuildinfo
+
+# Versões arquivadas (não usar)
+versao-antiga/
+versao-sala-arquivada/
+.claude/
+
+# PDFs grandes (colocar localmente em site/public/propostas e SITE-PRONTO/propostas)
+*.pdf
+
+# Sistema
+.DS_Store
+Thumbs.db
+*.log
+.env
+.env.*

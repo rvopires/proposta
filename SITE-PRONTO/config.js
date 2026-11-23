@@ -16,7 +16,7 @@ window.__CONFIG__ = {
   // O PDF pode ser um arquivo na pasta "propostas" ou um link (Drive, OneDrive...).
   propostas: {
     exemplo: {
-      cliente: "Empresa Exemplo",
+      cliente: "Exemplo",
       pdf: "propostas/exemplo.pdf",
     },
 

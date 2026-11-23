@@ -5,13 +5,9 @@ import { useConfig } from "@/lib/config"
 
 const LOGO = "https://tecnocursos.com.br/uploads/NOVA%20LOGO%20TECNOCURSOS%20BRANCO%20SEM%20SLOGAN%201.png"
 
-const PASSOS = [
-  "Conheça a empresa",
-  "Analise a proposta",
-  "Explore os treinamentos",
-]
+const PASSOS = ["Assista ao vídeo", "Veja a proposta", "Conheça o treinamento"]
 
-const svgUri = (corpo: string) =>
+const svgUri =(corpo: string) =>
   "data:image/svg+xml;utf8," +
   encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 272 184" width="272" height="184">${corpo}</svg>`)
 
@@ -72,8 +68,14 @@ export function embedDe(url?: string): string | null {
   return null
 }
 
+// Largura das pastas calculada para tudo caber numa tela só, sem rolar (a pasta tem ~0,82 de altura/largura).
 function useLargura() {
-  const calc = () => Math.min(360, window.innerWidth - 48)
+  const calc = () => {
+    const w = window.innerWidth
+    const h = window.innerHeight
+    if (w >= 768) return Math.max(180, Math.min(360, (Math.min(w, 1120) - 80) / 3, (h - 290) / 0.82))
+    return Math.max(120, Math.min(360, w - 48, (h - 320) / 3 / 0.82))
+  }
   const [w, setW] = useState(calc)
   useEffect(() => {
     const f = () => setW(calc())
@@ -118,37 +120,27 @@ export default function App() {
 
       <div className="relative z-30 mx-auto flex w-[min(1120px,100%-32px)] items-center pt-4 sm:pt-5">
         <img src={LOGO} alt="TecnoCursos" className="h-8 sm:h-9" />
-        {proposta && (
-          <span className="ml-auto max-w-[55%] truncate text-right text-xs text-white/55 sm:text-sm">
-            Proposta · {proposta.cliente}
-          </span>
-        )}
       </div>
 
-      <main className="mx-auto flex w-[min(1120px,100%-32px)] flex-1 flex-col">
-        <section className="pt-6 pb-1 text-center sm:pt-8">
-          <h1
-            className="rise mx-auto max-w-3xl text-[clamp(1.7rem,5vw,3rem)] leading-[1.12] font-bold tracking-tight"
+      <main className="mx-auto flex w-[min(1120px,100%-32px)] flex-1 flex-col justify-center">
+        {/* A saudação já aparece na abertura: aqui só o passo a passo, sem repetir texto. */}
+        <section className="pt-3 pb-1 text-center sm:pt-4">
+          <ol
+            className="rise mx-auto flex max-w-3xl flex-wrap items-center justify-center gap-x-3 gap-y-2 text-[11px] text-white/85 sm:gap-x-6 sm:text-[15px]"
             style={{ animationDelay: "80ms" }}
           >
-            {proposta ? (
-              <>
-                Olá, <span className="text-brand">{proposta.cliente}</span>
-              </>
-            ) : (
-              <>Sua experiência começa aqui.</>
-            )}
-          </h1>
-
-          <p
-            className="rise mx-auto mt-3 max-w-xl text-sm leading-relaxed text-white/70 sm:text-[0.95rem]"
-            style={{ animationDelay: "160ms" }}
-          >
-            Abra as pastas: vídeo, proposta e treinamento.
-          </p>
+            {PASSOS.map((t, i) => (
+              <li key={t} className="flex items-center gap-1.5 sm:gap-2.5">
+                <span className="grid size-5 place-items-center rounded-full bg-brand text-[11px] sm:size-7 sm:text-[13px] font-semibold text-[#06281a]">
+                  {i + 1}
+                </span>
+                {t}
+              </li>
+            ))}
+          </ol>
         </section>
 
-        <section className="grid grid-cols-1 items-end justify-items-center gap-x-5 gap-y-1 pt-3 pb-5 md:grid-cols-3 md:pt-4 md:pb-6">
+        <section className="grid grid-cols-1 items-end justify-items-center gap-x-5 gap-y-1 pt-3 pb-3 md:grid-cols-3 md:pt-4 md:pb-4">
           <div className="pasta-wrap royal cursor-pointer">
             <GlassFolder
               className="pasta royal"
@@ -213,23 +205,15 @@ export default function App() {
           </div>
         </section>
 
-        <div className="rise mx-auto mb-6 w-full max-w-md px-1" style={{ animationDelay: "280ms" }}>
+        <div className="rise mx-auto mb-2 w-full max-w-md px-1" style={{ animationDelay: "280ms" }}>
           <a href={linkFalar} target="_blank" rel="noopener noreferrer" className="btn-falar flex w-full px-6 py-3.5 text-base">
             <IconeFalar className="size-5" />
             Vamos conversar?
           </a>
-          <p className="mt-4 text-center text-xs leading-relaxed text-white/45 sm:text-[13px]">
-            {PASSOS.map((t, i) => (
-              <span key={t}>
-                {i > 0 && <span className="mx-1.5 text-white/25">·</span>}
-                {t}
-              </span>
-            ))}
-          </p>
         </div>
       </main>
 
-      <footer className="mt-auto px-6 pt-8 pb-8 text-center">
+      <footer className="mt-auto px-6 pt-2 pb-3 text-center">
         <p className="text-xs text-white/40">
           © TecnoCursos ·{" "}
           <a href="https://tecnocursos.com.br/" target="_blank" rel="noopener noreferrer" className="text-white/55 hover:text-brand-light">

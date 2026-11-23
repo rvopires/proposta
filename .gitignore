@@ -1,13 +1,18 @@
 # Dependências e build local
-site/node_modules/
+**/node_modules/
 site/dist/
 site/*.tsbuildinfo
 site/tsconfig.tsbuildinfo
+.tools/
 
 # Versões arquivadas (não usar)
 versao-antiga/
 versao-sala-arquivada/
 .claude/
+
+# Vídeos acima do limite do GitHub (100 MB)
+LEROY/leroy merlin - apresentação final.mp4
+LEROY/leroy merlin - apresentação final(1).mp4
 
 # PDFs grandes (colocar localmente em site/public/propostas e SITE-PRONTO/propostas)
 *.pdf

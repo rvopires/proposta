@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mockup · Abertura com vídeo</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--green:#32AD78;--mint:#6ABB8C;--bg:#041018}
+  *{box-sizing:border-box;margin:0}
+  html,body{height:100%;overflow:hidden;background:var(--bg);color:#fff;font-family:"Poppins",system-ui,sans-serif}
+  iframe{position:fixed;inset:0;width:100%;height:100%;border:0}
+
+  #intro{
+    position:fixed;inset:0;z-index:10;background:var(--bg);overflow:hidden;
+    clip-path:circle(150% at var(--x,50%) var(--y,50%));
+    transition:clip-path 1.2s cubic-bezier(.7,0,.2,1);
+  }
+  #intro.abre{clip-path:circle(0% at var(--x,50%) var(--y,50%))}
+
+  /* vídeo de fundo com leve paralaxe */
+  #video{position:absolute;left:-3%;top:-3%;width:106%;height:106%;object-fit:cover;
+    transition:transform .6s cubic-bezier(.2,.8,.2,1);will-change:transform}
+  /* escurece o centro para o texto ficar legível */
+  .veu{position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(ellipse 55% 45% at 50% 50%,rgba(4,16,24,.72),rgba(4,16,24,.15) 75%,transparent)}
+  /* luz que segue o cursor/dedo */
+  .luz{position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;opacity:.9;
+    background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(50,173,120,.28),transparent 70%)}
+
+  /* mesma distância entre logo, frase e botão (--esp), e um espaço fixo para barra/botão: nada pula de lugar */
+  .centro{--esp:clamp(26px,5vh,44px);position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;gap:var(--esp)}
+  .logo{height:clamp(38px,6vw,54px)}
+  .acao{display:grid;place-items:center;height:60px;width:100%}
+  .acao>*{grid-area:1/1}
+  h1{font-size:clamp(1.6rem,5vw,2.8rem);font-weight:600;letter-spacing:-.02em;line-height:1.15;
+     opacity:0;transform:translateY(10px);transition:all .8s cubic-bezier(.2,.8,.2,1) .1s}
+  h1 span{display:block}
+  /* duas linhas do mesmo tamanho: a segunda só muda de cor */
+  /* "Olá!" de tamanho médio + frase de apoio menor, com ponto final */
+  h1 .ola{font-size:clamp(2rem,5.5vw,3.2rem);font-weight:700;line-height:1.1;letter-spacing:-.025em;color:#fff}
+  h1 .apoio{margin-top:10px;font-size:clamp(1.05rem,2.8vw,1.6rem);font-weight:400;line-height:1.3;letter-spacing:0;color:rgba(255,255,255,.9)}
+  h1 .apoio{text-wrap:balance}
+  h1 .apoio em{font-style:normal;font-weight:600;color:var(--green);white-space:nowrap} /* "para você." nunca se separa */
+
+  .carga{display:flex;flex-direction:column;align-items:center;gap:12px;transition:opacity .4s}
+  .barra{width:min(260px,66vw);height:3px;border-radius:3px;background:rgba(255,255,255,.18);overflow:hidden}
+  .barra b{display:block;width:0;height:100%;background:var(--green);border-radius:3px}
+  .pct{font-size:.78rem;color:rgba(255,255,255,.65);font-variant-numeric:tabular-nums;letter-spacing:.05em}
+
+  .entrar{
+    opacity:0;pointer-events:none;
+    display:inline-flex;align-items:center;gap:14px;
+    font:600 1.05rem "Poppins",sans-serif;color:#fff;cursor:pointer;
+    padding:8px 8px 8px 30px;border-radius:999px;
+    background:rgba(255,255,255,.08);border:1px solid rgba(106,187,140,.55);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 14px 34px -14px rgba(50,173,120,.6);
+    transform:translateY(12px);transition:opacity .6s,transform .6s cubic-bezier(.2,.8,.2,1),background .25s,border-color .25s}
+  .entrar .seta{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:var(--green);color:#06281a;transition:transform .3s}
+  .entrar .seta svg{width:20px;height:20px}
+  .entrar:hover{background:rgba(50,173,120,.22);border-color:var(--mint)}
+  .entrar:hover .seta{transform:translateX(4px)}
+
+  /* estado: pronto */
+  #intro.pronto h1{opacity:1;transform:none}
+  #intro.pronto .carga{opacity:0;pointer-events:none}
+  #intro.pronto .entrar{opacity:1;transform:none;pointer-events:auto}
+
+  @media (prefers-reduced-motion:reduce){#intro{transition:none}#video{transition:none}}
+</style>
+</head>
+<body>
+<iframe id="pagina" title="Página da proposta"></iframe>
+
+<div id="intro">
+  <video id="video" src="SITE-PRONTO/fundo.mp4" poster="SITE-PRONTO/fundo-poster.jpg"
+         autoplay muted loop playsinline preload="auto"></video>
+  <div class="veu"></div>
+  <div class="luz" id="luz"></div>
+
+  <div class="centro">
+    <img class="logo" src="https://tecnocursos.com.br/uploads/NOVA%20LOGO%20TECNOCURSOS%20BRANCO%20SEM%20SLOGAN%201.png" alt="TecnoCursos">
+    <h1>
+      <span class="ola">Olá!</span>
+      <span class="apoio">Preparamos esta apresentação <em>para você.</em></span>
+    </h1>
+    <div class="acao">
+    <div class="carga"><div class="barra"><b id="bar"></b></div><div class="pct"><span id="pct">0</span>%</div></div>
+    <button class="entrar" id="entrar">Abrir proposta
+      <span class="seta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const intro = document.getElementById("intro");
+  const pagina = document.getElementById("pagina");
+  const video = document.getElementById("video");
+  const reduz = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduz) video.removeAttribute("autoplay"), video.pause();
+
+  // Abertura igual para todas as empresas: nenhum nome aqui.
+  let paginaOk = false, videoOk = false;
+  pagina.addEventListener("load", () => paginaOk = true);
+  pagina.src = "SITE-PRONTO/index.html?c=exemplo";
+  if (video.readyState >= 3) videoOk = true; else video.addEventListener("canplaythrough", () => videoOk = true, {once:true});
+  video.addEventListener("error", () => videoOk = true); // sem vídeo: segue só com o poster
+
+  // luz + paralaxe seguem o cursor/dedo
+  const luz = document.getElementById("luz");
+  function mover(e){
+    const p = e.touches ? e.touches[0] : e;
+    luz.style.setProperty("--mx", p.clientX+"px"); luz.style.setProperty("--my", p.clientY+"px");
+    if (reduz) return;
+    const dx = (p.clientX/innerWidth - .5), dy = (p.clientY/innerHeight - .5);
+    video.style.transform = `translate(${-dx*28}px,${-dy*18}px)`;
+  }
+  addEventListener("pointermove", mover); addEventListener("touchmove", mover, {passive:true});
+
+  // carregamento: mínimo ~2,4s e só fecha com vídeo e página carregados
+  const bar = document.getElementById("bar"), pct = document.getElementById("pct"), t0 = performance.now();
+  (function carrega(){
+    let v = Math.min((performance.now()-t0)/2400, 1);
+    if (!(paginaOk && videoOk)) v = Math.min(v, .92);
+    bar.style.width = v*100+"%"; pct.textContent = Math.round(v*100);
+    if (v >= 1){ intro.classList.add("pronto"); return; }
+    requestAnimationFrame(carrega);
+  })();
+
+  let aberto = false;
+  document.getElementById("entrar").addEventListener("click", e => {
+    if (aberto) return; aberto = true;
+    intro.style.setProperty("--x", e.clientX+"px"); intro.style.setProperty("--y", e.clientY+"px");
+    intro.classList.add("abre"); setTimeout(() => intro.remove(), 1400);
+  });
+</script>
+</body>
+</html>

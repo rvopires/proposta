@@ -6,7 +6,7 @@ import { useConfig } from "@/lib/config"
 
 const LOGO = "https://tecnocursos.com.br/uploads/NOVA%20LOGO%20TECNOCURSOS%20BRANCO%20SEM%20SLOGAN%201.png"
 
-const PASSOS = ["Assista ao vídeo", "Veja a proposta", "Conheça o treinamento"]
+const PASSOS = ["Assista ao vídeo", "Conheça o treinamento", "Veja a proposta"]
 
 const svgUri =(corpo: string) =>
   "data:image/svg+xml;utf8," +
@@ -175,6 +175,25 @@ export default function App() {
             />
           </div>
 
+          <div className="pasta-wrap grafite cursor-pointer">
+            <GlassFolder
+              className="pasta grafite"
+              label="Treinamentos"
+              meta="Conheça a plataforma"
+              art="none"
+              action="none"
+              width={largura}
+              appearDelay={120}
+              open={false}
+              onOpenChange={(queroAbrir) => {
+                if (queroAbrir) abrir(cfg.treinamento)
+              }}
+              onFileSelect={() => abrir(cfg.treinamento)}
+              files={[{ name: "Treinamento online", meta: "Demonstração", image: CAPA_TREINO, href: cfg.treinamento }]}
+            />
+          </div>
+
+          {/* A proposta fica por último, no HTML e na tela */}
           <div className="pasta-wrap verde destaque cursor-pointer">
             <GlassFolder
               className="pasta verde"
@@ -183,7 +202,7 @@ export default function App() {
               art="none"
               action="none"
               width={largura}
-              appearDelay={120}
+              appearDelay={240}
               open={false}
               onOpenChange={(queroAbrir) => {
                 if (queroAbrir) abrir(proposta?.pdf)
@@ -194,24 +213,6 @@ export default function App() {
                   ? { name: "Proposta comercial", meta: "PDF", image: CAPA_PROPOSTA, href: proposta.pdf }
                   : { name: "Use o seu link exclusivo", meta: "Indisponível", image: CAPA_PROPOSTA },
               ]}
-            />
-          </div>
-
-          <div className="pasta-wrap grafite cursor-pointer">
-            <GlassFolder
-              className="pasta grafite"
-              label="Treinamentos"
-              meta="Conheça a plataforma"
-              art="none"
-              action="none"
-              width={largura}
-              appearDelay={240}
-              open={false}
-              onOpenChange={(queroAbrir) => {
-                if (queroAbrir) abrir(cfg.treinamento)
-              }}
-              onFileSelect={() => abrir(cfg.treinamento)}
-              files={[{ name: "Treinamento online", meta: "Demonstração", image: CAPA_TREINO, href: cfg.treinamento }]}
             />
           </div>
         </section>

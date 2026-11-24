@@ -1,0 +1,11 @@
+Options -Indexes
+
+# Arquivos que começam com ponto (ex.: .tentativas.json) nunca podem ser abertos pelo navegador
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+# Nunca guardar em cache a página de envio
+<IfModule mod_headers.c>
+    Header set Cache-Control "no-store"
+</IfModule>

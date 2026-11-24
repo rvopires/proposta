@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import GlassFolder from "@/components/ui/glass-folder-cards"
 import FundoVidro from "@/components/FundoVidro"
+import Abertura from "@/components/Abertura"
 import { useConfig } from "@/lib/config"
 
 const LOGO = "https://tecnocursos.com.br/uploads/NOVA%20LOGO%20TECNOCURSOS%20BRANCO%20SEM%20SLOGAN%201.png"
@@ -97,6 +98,13 @@ export default function App() {
   const cfg = useConfig()
   const largura = useLargura()
   const [player, setPlayer] = useState<string | null>(null)
+  // Abertura: "aberta" começa a revelar a página; depois de 1,4 s a abertura sai do DOM
+  const [aberta, setAberta] = useState(false)
+  const [abertura, setAbertura] = useState(true)
+  const abrirPagina = () => {
+    setAberta(true)
+    setTimeout(() => setAbertura(false), 1400)
+  }
 
   useEffect(() => {
     const f = (e: KeyboardEvent) => e.key === "Escape" && setPlayer(null)
@@ -115,7 +123,10 @@ export default function App() {
   const linkFalar = cfg.whatsapp ? `https://wa.me/${cfg.whatsapp}?text=${msg}` : "https://tecnocursos.com.br/"
 
   return (
-    <div className="relative flex min-h-dvh flex-col text-white">
+    <>
+    {abertura && <Abertura onAbrir={abrirPagina} />}
+    {/* key: a página reinicia as animações de entrada quando a abertura começa a abrir */}
+    <div key={aberta ? "aberta" : "fechada"} className="relative flex min-h-dvh flex-col text-white">
       <FundoVidro />
 
       <div className="relative z-30 mx-auto flex w-[min(1120px,100%-32px)] items-center pt-4 sm:pt-5">
@@ -246,5 +257,6 @@ export default function App() {
       )}
 
     </div>
+    </>
   )
 }

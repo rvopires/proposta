@@ -1,0 +1,6 @@
+Options -Indexes
+
+# Os dados do cliente mudam quando trocamos a proposta: nunca guardar em cache
+<IfModule mod_headers.c>
+    Header set Cache-Control "no-store"
+</IfModule>

@@ -1,0 +1,7 @@
+# Ninguém consegue listar o conteúdo das pastas (c/, propostas/, admin/)
+Options -Indexes
+
+# Arquivos que começam com ponto ficam bloqueados
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>

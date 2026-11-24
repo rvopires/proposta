@@ -1,0 +1,48 @@
+PÁGINA DE ENVIO DE PROPOSTAS (para a equipe de TI)
+==================================================
+
+O QUE É
+  Uma página (admin/) onde se cria o link de cada cliente: digita o nome, anexa o PDF e clica em
+  "Criar link". Não precisa mexer em código nem subir arquivo por FTP a cada proposta.
+
+INSTALAR NA HOSTINGER (uma vez só)
+  1. No hPanel > Gerenciador de Arquivos, envie TODO o conteúdo da pasta SITE-PRONTO para a pasta
+     do site (ex.: public_html/proposta/). Deve ficar assim:
+        proposta/index.html
+        proposta/config.js
+        proposta/fundo.mp4
+        proposta/admin/   (esta pasta)
+        proposta/c/
+        proposta/propostas/
+  2. Dentro de proposta/admin/, copie "config.exemplo.php" para "config.php" e abra o config.php
+     para trocar a senha (mínimo de 8 caracteres, use uma forte).
+  3. Permissões: as pastas c/ , propostas/ e admin/ precisam aceitar gravação pelo PHP
+     (normalmente 755 já funciona na Hostinger; se der erro de gravação, use 775).
+  4. Use sempre HTTPS (ative o SSL gratuito no hPanel).
+  5. Abra https://SEU-SITE/proposta/admin/ e entre com a senha.
+
+USO NO DIA A DIA
+  - Novo cliente: nome + PDF > "Criar link" > copie o link (botão "Copiar link") e envie.
+  - Trocar a proposta de um cliente: "Trocar PDF" na linha dele. O LINK CONTINUA O MESMO.
+  - Apagar: remove o cliente e o PDF (o link para de funcionar).
+
+LIMITES DE TAMANHO
+  O PHP da Hostinger limita o envio (upload_max_filesize / post_max_size). A própria página mostra
+  o limite atual. Se um PDF não subir, comprima-o (alvo: 5 a 10 MB) ou aumente o limite em
+  hPanel > Avançado > Configuração do PHP.
+
+SEGURANÇA (o que já está feito)
+  - Senha obrigatória, bloqueio de 15 min após 5 erros, proteção contra envio forjado (CSRF).
+  - Só aceita arquivo que seja de fato PDF.
+  - O link de cada cliente tem um código aleatório (ex.: leroy-merlin-a3f9c2): não dá para adivinhar
+    o link de outro cliente, e a lista de clientes NÃO fica pública.
+  - O PDF também recebe código aleatório no nome.
+  - Cada PDF continua acessível para quem tiver o endereço exato dele. Não use este sistema
+    para documentos confidenciais demais sem pensar em proteção extra.
+  - Nunca envie o admin/config.php para o GitHub (já está no .gitignore).
+
+DÚVIDAS FREQUENTES
+  - "Falta criar o config.php": faltou o passo 2.
+  - "Não consegui gravar": ajuste as permissões (passo 3).
+  - Cliente abre o link e aparece "Use o seu link exclusivo": o link está sem o ?c=código, ou o
+    cliente foi apagado.

@@ -23,3 +23,11 @@ Thumbs.db
 *.log
 .env
 .env.*
+
+# Página de envio (PHP): senha e dados de clientes nunca vão para o GitHub
+site/public/admin/config.php
+SITE-PRONTO/admin/config.php
+site/public/admin/.tentativas.json
+SITE-PRONTO/admin/.tentativas.json
+site/public/c/*.json
+SITE-PRONTO/c/*.json

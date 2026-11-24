@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import GlassFolder from "@/components/ui/glass-folder-cards"
 import FundoVidro from "@/components/FundoVidro"
 import Abertura from "@/components/Abertura"
-import { useConfig } from "@/lib/config"
+import { useConfig, type Proposta } from "@/lib/config"
 
 const LOGO = "https://tecnocursos.com.br/uploads/NOVA%20LOGO%20TECNOCURSOS%20BRANCO%20SEM%20SLOGAN%201.png"
 
@@ -106,6 +106,22 @@ export default function App() {
     setTimeout(() => setAbertura(false), 1400)
   }
 
+  // Sem ?c=..., usa "exemplo" (PDF em propostas/exemplo.pdf). Link do cliente: ?c=slug
+  const slug = (new URLSearchParams(location.search).get("c") || "exemplo").toLowerCase()
+
+  // Propostas criadas pela página de envio (admin/) ficam em c/<slug>.json, um arquivo por cliente.
+  // Assim a lista de clientes não fica pública no config.js. Só funciona via http(s), não com dois cliques.
+  const [remota, setRemota] = useState<Proposta | null>(null)
+  useEffect(() => {
+    if (!cfg || cfg.propostas[slug] || !/^[a-z0-9-]{3,80}$/.test(slug)) return
+    fetch(`./c/${slug}.json`, { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => {
+        if (j && typeof j.cliente === "string" && /^propostas\/[\w.-]+\.pdf$/.test(j.pdf)) setRemota({ cliente: j.cliente, pdf: j.pdf })
+      })
+      .catch(() => {})
+  }, [cfg, slug])
+
   useEffect(() => {
     const f = (e: KeyboardEvent) => e.key === "Escape" && setPlayer(null)
     window.addEventListener("keydown", f)
@@ -114,9 +130,7 @@ export default function App() {
 
   if (!cfg) return <FundoVidro />
 
-  // Sem ?c=..., usa "exemplo" (PDF em propostas/exemplo.pdf). Link do cliente: ?c=slug
-  const slug = new URLSearchParams(location.search).get("c")?.toLowerCase() || "exemplo"
-  const proposta = cfg.propostas[slug]
+  const proposta: Proposta | undefined = cfg.propostas[slug] ?? remota ?? undefined
   const msg = encodeURIComponent(
     `Olá! Vi a proposta da TecnoCursos${proposta ? ` (${proposta.cliente})` : ""} e gostaria de conversar.`,
   )
@@ -196,6 +210,7 @@ export default function App() {
           {/* A proposta fica por último, no HTML e na tela */}
           <div className="pasta-wrap verde destaque cursor-pointer">
             <GlassFolder
+              key={proposta ? "com-proposta" : "sem-proposta"}
               className="pasta verde"
               label="Sua proposta"
               meta={proposta ? "Apresentação comercial" : "Use o seu link exclusivo"}

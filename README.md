@@ -24,6 +24,19 @@ Edite só `SITE-PRONTO/config.js` (ou `site/public/config.js` antes do build):
 
 Link do cliente: `https://rvopires.github.io/proposta/?c=slug-do-cliente`
 
+## Hospedagem com PHP (Hostinger): página de envio
+
+Para a equipe de TI criar o link de cada cliente sem mexer em código, existe a página `admin/`
+(nome do cliente + PDF → link pronto, com troca e exclusão). Instruções completas em
+[`site/public/admin/LEIA-ME.txt`](site/public/admin/LEIA-ME.txt). Resumo:
+
+1. Envie o conteúdo de `SITE-PRONTO/` para a pasta do site na Hostinger.
+2. Em `admin/`, copie `config.exemplo.php` para `config.php` e troque a senha (nunca vai para o GitHub).
+3. Abra `https://seu-site/proposta/admin/`.
+
+Os dados de cada cliente ficam em `c/<slug>.json` e os PDFs em `propostas/`. O GitHub Pages **não executa PHP**:
+lá a página de envio não funciona (use o `config.js` manual).
+
 ## Desenvolvimento
 
 ```bash

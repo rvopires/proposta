@@ -8,20 +8,77 @@ const LIMITE_MS = 9000 // se o vídeo demorar demais, libera mesmo assim
 export default function Abertura({ onAbrir }: { onAbrir: () => void }) {
   const raiz = useRef<HTMLDivElement>(null)
   const video = useRef<HTMLVideoElement>(null)
+  const tela = useRef<HTMLCanvasElement>(null)
   const [progresso, setProgresso] = useState(0)
   const [pronto, setPronto] = useState(false)
   const [abrindo, setAbrindo] = useState(false)
   const videoOk = useRef(false)
+  const alvo = useRef({ x: 0, y: 0 }) // paralaxe: -0.5 a 0.5
+
+  // O vídeo é desenhado num <canvas> (em vez de aparecer direto na tela): em alguns celulares e navegadores
+  // embutidos o vídeo "direto" fica por cima de todo o resto e esconde logo, texto e botão.
+  useEffect(() => {
+    const v = video.current
+    const c = tela.current
+    if (!v || !c) return
+    const ctx = c.getContext("2d")
+    if (!ctx) return
+    const reduz = matchMedia("(prefers-reduced-motion: reduce)").matches
+    if (reduz) v.pause()
+    const ok = () => (videoOk.current = true)
+    if (v.readyState >= 3) ok()
+    v.addEventListener("canplaythrough", ok)
+    v.addEventListener("error", ok)
+
+    let w = 0
+    let h = 0
+    const ajusta = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5)
+      w = Math.round(innerWidth * dpr)
+      h = Math.round(innerHeight * dpr)
+      c.width = w
+      c.height = h
+    }
+    ajusta()
+    addEventListener("resize", ajusta)
+
+    const mover = (e: PointerEvent) => {
+      raiz.current?.style.setProperty("--mx", e.clientX + "px")
+      raiz.current?.style.setProperty("--my", e.clientY + "px")
+      alvo.current = { x: e.clientX / innerWidth - 0.5, y: e.clientY / innerHeight - 0.5 }
+    }
+    addEventListener("pointermove", mover)
+
+    let px = 0
+    let py = 0
+    let raf = 0
+    const desenha = () => {
+      if (v.readyState >= 2 && v.videoWidth) {
+        px += (alvo.current.x - px) * 0.06
+        py += (alvo.current.y - py) * 0.06
+        // "cover" com 6% de folga para o paralaxe não mostrar borda
+        const esc = Math.max(w / v.videoWidth, h / v.videoHeight) * 1.06
+        const dw = v.videoWidth * esc
+        const dh = v.videoHeight * esc
+        const x = (w - dw) / 2 - px * w * 0.04
+        const y = (h - dh) / 2 - py * h * 0.025
+        ctx.drawImage(v, x, y, dw, dh)
+      }
+      raf = requestAnimationFrame(desenha)
+    }
+    desenha()
+
+    return () => {
+      cancelAnimationFrame(raf)
+      removeEventListener("resize", ajusta)
+      removeEventListener("pointermove", mover)
+      v.removeEventListener("canplaythrough", ok)
+      v.removeEventListener("error", ok)
+    }
+  }, [])
 
   // Carregamento: ~2,4 s no mínimo e só fecha com o vídeo carregado (ou após o limite)
   useEffect(() => {
-    const v = video.current
-    if (v) {
-      if (v.readyState >= 3) videoOk.current = true
-      const ok = () => (videoOk.current = true)
-      v.addEventListener("canplaythrough", ok)
-      v.addEventListener("error", ok)
-    }
     const t0 = performance.now()
     let raf = 0
     const passo = () => {
@@ -36,23 +93,6 @@ export default function Abertura({ onAbrir }: { onAbrir: () => void }) {
     return () => cancelAnimationFrame(raf)
   }, [])
 
-  // Luz verde e paralaxe do vídeo seguem o mouse/dedo
-  useEffect(() => {
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      video.current?.pause()
-      return
-    }
-    const mover = (e: PointerEvent) => {
-      raiz.current?.style.setProperty("--mx", e.clientX + "px")
-      raiz.current?.style.setProperty("--my", e.clientY + "px")
-      const dx = e.clientX / innerWidth - 0.5
-      const dy = e.clientY / innerHeight - 0.5
-      if (video.current) video.current.style.transform = `translate(${-dx * 28}px,${-dy * 18}px)`
-    }
-    addEventListener("pointermove", mover)
-    return () => removeEventListener("pointermove", mover)
-  }, [])
-
   const abrir = (e: React.MouseEvent) => {
     if (abrindo) return
     const el = raiz.current
@@ -64,9 +104,10 @@ export default function Abertura({ onAbrir }: { onAbrir: () => void }) {
 
   return (
     <div ref={raiz} className={`abertura${pronto ? " pronto" : ""}${abrindo ? " abre" : ""}`}>
+      {/* o <video> fica minúsculo e quase invisível, só como fonte de imagem para o canvas */}
       <video
         ref={video}
-        className="abertura-video"
+        className="abertura-fonte"
         src="./fundo.mp4"
         poster="./fundo-poster.jpg"
         autoPlay
@@ -74,7 +115,9 @@ export default function Abertura({ onAbrir }: { onAbrir: () => void }) {
         loop
         playsInline
         preload="auto"
+        aria-hidden
       />
+      <canvas ref={tela} className="abertura-video" style={{ backgroundImage: "url(./fundo-poster.jpg)" }} />
       <div className="abertura-veu" />
       <div className="abertura-luz" />
 
